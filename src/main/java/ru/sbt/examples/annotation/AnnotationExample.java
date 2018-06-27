@@ -50,6 +50,7 @@ public class AnnotationExample {
 
     private static void checkColumnLimitation( Object object ) {
         // добавить проверки
+        System.out.println("sdfsdf");
     }
 
     private static void checkPrimaryKey( Object object ) {
