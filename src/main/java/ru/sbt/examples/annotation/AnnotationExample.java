@@ -1,5 +1,9 @@
 package ru.sbt.examples.annotation;
 
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,7 +37,7 @@ public class AnnotationExample {
                         .price( 123.45 )
                         .build()
                 , ORMExample2.builder()
-                        .id( 1 )
+                        .id( null )
                         .service( "разработка на java" )
                         .price( 123456789.123456789 )
                         .build()
@@ -50,9 +54,76 @@ public class AnnotationExample {
 
     private static void checkColumnLimitation( Object object ) {
         // добавить проверки
+        Class<?> clazz = object.getClass();
+
+        for ( Field field : clazz.getDeclaredFields() ){
+
+            if (field.isAnnotationPresent( Id.class )) {
+
+                System.out.println("@Id is present");
+                Id id = field.getAnnotation(Id.class);
+
+                Object value = null;
+
+                Boolean accessible = field.isAccessible();
+                if (!accessible) field.setAccessible( true );
+                try{
+                    value = field.get( object );
+                } catch ( Exception e){
+                    e.printStackTrace();
+                }finally {
+                    field.setAccessible( accessible );
+                }
+
+                if ( (value == null) && (!field.isAnnotationPresent( GeneratedValue.class )) ) {
+                    System.out.println("WARNING !!! @Id is present and NULL, OR @GeneratedValue is absent");
+                    break;
+                }
+
+                System.out.println("Id is NULL: " + (value == null) +
+                                    "; GeneratedValue is present: " +
+                                    (field.isAnnotationPresent( GeneratedValue.class )));
+
+                return;
+            }
+
+            System.out.println("@Id is absent");
+
+
+        }
     }
 
     private static void checkPrimaryKey( Object object ) {
+
+        Class<?> clazz = object.getClass();
+
+        for ( Field field : clazz.getDeclaredFields() ){
+            if (field.isAnnotationPresent( Column.class )) {
+                Column column = field.getAnnotation( Column.class );
+                int maxLength = column.length();
+
+                Object value = null;
+
+                Boolean accessible = field.isAccessible();
+
+                if (!accessible) field.setAccessible( true );
+                try {
+                    value = field.get( object );
+                } catch ( Exception e ){
+                    e.printStackTrace();
+                }finally {
+                    field.setAccessible( accessible );
+                }
+
+
+                if (value == null) break;
+
+                if (value.toString().length() > maxLength){
+                    System.out.println("Error ColumnName:" + value);
+                    System.out.println("WARNING!!! The length of the Column name must be no more than " + maxLength);
+                }
+            }
+        }
         // добавить проверки
     }
 }
