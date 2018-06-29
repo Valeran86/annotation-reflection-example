@@ -9,12 +9,22 @@ public class CountMapImpl {
     public MyCountMap<String> myCountMap = new MyCountMap<String>();
 
     public static void main( String[] args ) throws NoSuchFieldException {
-        Field field = CountMapImpl.class.getField("myCountMap");
+
 
         Class clazz = MyCountMap.class;
         Type genericFieldType = clazz.getGenericSuperclass();
 
+
+        Field[] fields = clazz.getDeclaredFields();
+
+        for(Field field : fields){
+            System.out.println(field.getGenericType());
+            System.out.println(field.toGenericString());
+        }
+
         System.out.println(genericFieldType.toString());
+        System.out.println(clazz.getSuperclass());
+        
 
     }
 }
