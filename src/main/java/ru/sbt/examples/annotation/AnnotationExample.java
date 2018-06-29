@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -115,15 +116,40 @@ public class AnnotationExample {
                     field.setAccessible( accessible );
                 }
 
-
                 if (value == null) break;
 
-                if (value.toString().length() > maxLength){
+
+                if (!isNullableCorrect( column, value )){
+                    System.out.println("ERROR! ColumnName" + value + " is NOTNULL!");
+                }
+
+                if (!isColumnLengthCorrect( column, value )){
                     System.out.println("Error ColumnName:" + value);
                     System.out.println("WARNING!!! The length of the Column name must be no more than " + maxLength);
                 }
+
+                if ((value.getClass().getSuperclass().equals( java.lang.Number.class) && (!isPrecisionCorrect( column, value )))){
+                    System.out.println("ERROR! Precission of " + value.toString() +  " must be " + column.precision());
+                }
+
             }
         }
-        // добавить проверки
+        
+    }
+
+    private static boolean isColumnLengthCorrect (Column column, Object value){
+        if (value.toString().length() > column.length()) return false;
+        return true;
+    }
+
+    private static boolean isNullableCorrect (Column column, Object value){
+        if ((!column.nullable()) && (value.toString().length() == 0)) return false;
+        return true;
+    }
+
+    private static boolean isPrecisionCorrect (Column column, Object value){
+        int valuePrecision = (value.toString().length()-1) - value.toString().indexOf( '.', 1 );
+        if (valuePrecision!=column.precision()) return false;
+        return true;
     }
 }
