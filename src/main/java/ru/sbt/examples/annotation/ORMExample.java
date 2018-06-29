@@ -17,6 +17,6 @@ public class ORMExample {
     private Integer id;
     @Column( length = 30, name = "NAME_IN_TABLE" )
     private String name;
-    @Column( nullable = false )
+    @Column( nullable = false)
     private Boolean active;
 }
