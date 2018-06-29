@@ -10,26 +10,6 @@ import java.util.Map;
 public class CountMapImpl<T> implements CountMap<T> {
     private Map<T,Integer> myMap=new HashMap<>();
 
-    public TypeVariable[]  reflectionResult() {
-        return this.getClass().getTypeParameters();
-    }
-
-    public String reflectionResultMyMap(){
-        try {
-            Field field=this.getClass().getDeclaredField("myMap");
-            field.setAccessible(true);
-            Type genericFieldType = field.getGenericType();
-            if(genericFieldType instanceof ParameterizedType){
-                ParameterizedType parameterizedType = (ParameterizedType) genericFieldType;
-                return parameterizedType.getTypeName();
-            }
-
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
     @Override
     public void add(T o) {
         myMap.merge(o,1,Integer::sum);

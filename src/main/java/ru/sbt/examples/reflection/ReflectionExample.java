@@ -45,22 +45,23 @@ public class ReflectionExample {
         System.out.println("Результат 3. Проверить, что все String константы имеют значение = их имени");
         Field[] fields = ReflectionExample.class.getDeclaredFields();
         for(Field field : fields) {
-            if(!field.getType().equals(String.class)){
+            if(!String.class.equals(field.getType())){
                 continue;
             }
 
-            if(Modifier.isFinal(field.getModifiers()) && Modifier.isStatic(field.getModifiers())) {
-                try{
-                    String fieldValue=String.valueOf(field.get(null));
-                    if(fieldValue!=null && field.getName().toLowerCase().equals(fieldValue.toLowerCase())){
-                        System.out.println("OK:Константа "+field.getName() + " имеет значение равное её имени");
-                    }else{
-                        System.out.println("WARNING:Константа "+field.getName() + " имеет значение не равное её имени");
-                    }
-
-                }catch (IllegalAccessException error){
-                    error.printStackTrace();
+            if(!Modifier.isFinal(field.getModifiers()) || !Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            try{
+                String fieldValue=String.valueOf(field.get(null));
+                if(fieldValue!=null && field.getName().toLowerCase().equals(fieldValue.toLowerCase())){
+                    System.out.println("OK:Константа "+field.getName() + " имеет значение равное её имени");
+                }else{
+                    System.out.println("WARNING:Константа "+field.getName() + " имеет значение не равное её имени");
                 }
+
+            }catch (IllegalAccessException error){
+                error.printStackTrace(System.out);
             }
         }
 

@@ -66,9 +66,9 @@ public class BeanUtils {
                 try {
                     methodToSet.invoke(to,methodFromGet.invoke(from,null));
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    e.printStackTrace(System.out);
                 } catch (InvocationTargetException e) {
-                    e.printStackTrace();
+                    e.printStackTrace(System.out);
                 }
             }
         }

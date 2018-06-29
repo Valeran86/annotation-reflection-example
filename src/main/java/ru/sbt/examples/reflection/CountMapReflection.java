@@ -10,23 +10,6 @@ public class CountMapReflection {
 
     public static void main( String[] args )  {
 
-        TypeVariable[] typeVariables= CountMapImpl.class.getTypeParameters();
-        for(TypeVariable typeVariable:typeVariables){
-            System.out.println("Параметр инициализации при обращении к классу:"+typeVariable.getName());
-        }
-
-        typeVariables= map.getClass().getTypeParameters();
-        for(TypeVariable typeVariable:typeVariables){
-            System.out.println("Параметр инициализации при обращении к объекту класса:"+typeVariable.getName());
-        }
-
-        typeVariables= map.reflectionResult();
-        for(TypeVariable typeVariable:typeVariables){
-            System.out.println("Параметр инициализации непосредственно в объекте:"+typeVariable.getName());
-        }
-
-        System.out.println("Параметр инициализации атрибута myMap в самом объекте: " + map.reflectionResultMyMap());
-
         try {
             Field field=CountMapReflection.class.getDeclaredField("map");
             field.setAccessible(true);
@@ -36,13 +19,12 @@ public class CountMapReflection {
                 Type[]  actualTypeArguments= parameterizedType.getActualTypeArguments();
                 for(Type type : actualTypeArguments){
                     Class typeClass = (Class) type;
-                    System.out.println("Параметр инициализации атрибута на основе класса: " + typeClass);
+                    System.out.println("Параметр инициализации атрибута при создании объекта: " + typeClass);
                 }
             }
 
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
-
     }
 }

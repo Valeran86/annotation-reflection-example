@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 public class ExternalClassCountMapReflection {
 
     public static void main( String[] args )  {
+
         try {
             Field field=CountMapReflection.class.getDeclaredField("map");
             field.setAccessible(true);
@@ -17,11 +18,13 @@ public class ExternalClassCountMapReflection {
                 Type[]  actualTypeArguments= parameterizedType.getActualTypeArguments();
                 for(Type type : actualTypeArguments){
                     Class typeClass = (Class) type;
-                    System.out.println("Внешний класс: Параметр инициализации атрибута на основе класса: " + typeClass);
+                    System.out.println("Параметр инициализации атрибута при создании объекта при получении из внешнего класса: " + typeClass);
                 }
             }
+
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
+
     }
 }
