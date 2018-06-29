@@ -134,7 +134,7 @@ public class AnnotationExample {
 
             }
         }
-        
+
     }
 
     private static boolean isColumnLengthCorrect (Column column, Object value){

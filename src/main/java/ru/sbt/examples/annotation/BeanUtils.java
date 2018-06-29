@@ -2,8 +2,7 @@ package ru.sbt.examples.annotation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class BeanUtils {
           /**
@@ -36,28 +35,31 @@ public class BeanUtils {
             @param to -объект, свойства которого будут установлены. (т.е. тут вызывает сеттеры со значениями геттеров из объекта from)
             @param from - объект свойства которого будут использоваться для получения значений. (т.е. тут вызывает геттеры)
            */
+
+
         public static void assign(Object to, Object from) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
             Class fromClass = from.getClass();
-            List<Method> fromGetters = new ArrayList<Method>(  );
-            Method[] fromMethods = fromClass.getMethods();
-
-            for (Method method : fromMethods){
-                if( isGetter( method ) ) fromGetters.add( method );
-            }
-
-
             Class toClass = to.getClass();
+
+            Map<String, Method> fromGetters = new HashMap<String, Method>(  );
+            Map<String, Method> toSetters = new HashMap<String, Method>(  );
+
+            Method[] fromMethods = fromClass.getMethods();
             Method[] toMethods = toClass.getMethods();
 
-            Method fromGetter = null;
+            for (Method method : fromMethods){
+                if( isGetter( method ) ) fromGetters.put( method.getName().substring( 3 ), method );
+            }
 
-            for ( Method method : toMethods ){
-                fromGetter = setterEqualGetter( method, fromGetters );
+            for (Method method : toMethods){
+                String key = method.getName().substring( 3 );
+                if ((fromGetters.containsKey( key )) && ( isSetter( method ) ) && (isParamEquals(method, fromGetters.get( key )))){
 
-                if (( isSetter( method ) ) && ( fromGetter!=null )) {
+                    //На всякий случай добавлю в ХешМэп, хотя можно без него обойтись
+                    toSetters.put( method.getName().substring( 3 ), method );
 
-                    Method getMethod = fromClass.getMethod( fromGetter.getName(), null );
+                    Method getMethod = fromClass.getMethod( fromGetters.get( key ).getName(), null );
                     Object returnValue = getMethod.invoke( from );
 
                     Method setMethod = toClass.getMethod( method.getName(), method.getParameterTypes()[0] );
@@ -65,28 +67,16 @@ public class BeanUtils {
 
                 }
             }
+
         }
 
-        private static Method setterEqualGetter (Method setter, List<Method> getters){
-
+        private static boolean isParamEquals(Method setter, Method getter){
             Class[] setParams = setter.getParameterTypes();
-            if (setParams.length == 0) return null;
+            if (setParams.length == 0) return false;
 
-            for(Method testGetter : getters){
+            Class getParam = getter.getReturnType();
+            if ((getParam.equals( setParams[0] ))) return true;
 
-                Class getParam = testGetter.getReturnType();
-
-                if ((getParam.equals( setParams[0] )) && (namesEquals( testGetter.getName(), setter.getName() ))){
-                    return testGetter;
-                }
-            }
-
-            return null;
-        }
-
-        private static boolean namesEquals (String getName, String setName){
-
-            if (getName.substring( 3 ).equals( setName.substring( 3 ) )) return true;
             return false;
         }
 
