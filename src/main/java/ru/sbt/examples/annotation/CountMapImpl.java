@@ -11,16 +11,11 @@ public class CountMapImpl {
     public static void main( String[] args ) throws NoSuchFieldException {
         Field field = CountMapImpl.class.getField("myCountMap");
 
-        Type genericFieldType = field.getGenericType();
+        Class clazz = MyCountMap.class;
+        Type genericFieldType = clazz.getGenericSuperclass();
 
-        if(genericFieldType instanceof ParameterizedType){
-            ParameterizedType aType = (ParameterizedType) genericFieldType;
-            Type[] fieldArgTypes = aType.getActualTypeArguments();
-            for(Type fieldArgType : fieldArgTypes){
-                Class fieldArgClass = (Class) fieldArgType;
-                System.out.println("fieldArgClass = " + fieldArgClass);
-            }
-        }
+        System.out.println(genericFieldType.toString());
+
     }
 }
 
