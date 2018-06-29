@@ -1,11 +1,15 @@
 package ru.sbt.examples.annotation;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MyCountMap <E> implements CountMap<E>{
 
-    Map<E, Integer> container = new HashMap<E, Integer>();
+    public Map<E, Integer> container = new HashMap<E, Integer>();
 
     // добавляет элемент в этот контейнер.
     public void add(E o) {
@@ -43,6 +47,21 @@ public class MyCountMap <E> implements CountMap<E>{
     public Map toMap() {
         Map<E, Integer> newContainer = new HashMap<E, Integer>(container);
         return newContainer;
+    }
+
+    public static void main( String[] args ) throws NoSuchFieldException {
+        Field field = MyCountMap.class.getField("container");
+
+        Type genericFieldType = field.getGenericType();
+
+        if(genericFieldType instanceof ParameterizedType ){
+            ParameterizedType aType = (ParameterizedType) genericFieldType;
+            Type[] fieldArgTypes = aType.getActualTypeArguments();
+            for(Type fieldArgType : fieldArgTypes){
+                Class fieldArgClass = (Class) fieldArgType;
+                System.out.println("fieldArgClass = " + fieldArgClass);
+            }
+        }
     }
 
     //Тот же самый контракт как и toMap(), только всю информацию записать в destination
