@@ -33,7 +33,7 @@ public class ReflectionExample {
         System.out.println("222222222222222222222222222222");
         Task2 (ArrayList.class );
         System.out.println("33333333333333333333333333333");
-        Task3 (new ReflectionExample());
+        Task3 (  ReflectionExample.class);
     }
 
     public static   void Task1 (Class   clazz ){
@@ -52,21 +52,16 @@ public class ReflectionExample {
         }
     }
 
-    public static   void Task3 (Object someclass)  {
-        if (someclass ==  null)
+    public static   void Task3 (Class <?>  clazz)  {
+        if (clazz ==  null)
             return;
-        // необходимо убедиться, что передали экзмепляр класса
-        if (someclass instanceof  Class)
-            return;
-        Class <?> clazz = someclass.getClass();
         // проверям все public static final  поля типа String у класса clazz
-        // вопрос : 1. как получить доступ к final static полям через рефлексию без передачи ссылки на экземпляр класса ?
 
         for ( Field field: clazz.getFields()) {
             if (field.getType() != java.lang.String.class  || !Modifier.isFinal( field.getModifiers()  )  || !Modifier.isStatic( field.getModifiers() ))
                 continue;
             try {
-                String value = (String) field.get( someclass );
+                String value = (String) field.get( clazz );
                 if (!(field.getName().equals( value ))){
                     System.out.printf("Field [%s] != %s ",field.getName(),value);
                 }
