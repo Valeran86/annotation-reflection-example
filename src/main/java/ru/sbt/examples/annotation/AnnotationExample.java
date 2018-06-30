@@ -1,5 +1,10 @@
 package ru.sbt.examples.annotation;
 
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,10 +54,48 @@ public class AnnotationExample {
     }
 
     private static void checkColumnLimitation( Object object ) {
-        // добавить проверки
+        for (Field field : object.getClass().getDeclaredFields()) {
+            if (field.isAnnotationPresent(Column.class)) {
+                Column column = field.getAnnotation(Column.class);
+                Object value = new Object();
+                try {
+                    field.setAccessible(true);
+                    value = field.get(object);
+                }
+                catch (IllegalAccessException e) {
+                    System.out.println(e.getMessage());
+                }
+                if (column.precision() != 0) {
+                    if (value.toString() != String.format("%.2f", value)) {
+                        System.out.println("Объект " + object.toString() + " имеет неверную точность");
+                    }
+                }
+                if (!column.nullable()) {
+                    if (value == null) {
+                        System.out.println("Объект " + object.toString() + " имеет null в " + field.toString());
+                    }
+                }
+                if (column.length() != 255) {
+                    if (value.toString().length() > 30) {
+                        System.out.println("Объект " + object.toString() + " имеет неверное имя");
+                    }
+                }
+            }
+        }
     }
 
+
     private static void checkPrimaryKey( Object object ) {
-        // добавить проверки
+        for (Field field : object.getClass().getDeclaredFields()) {
+            try {
+                field.setAccessible(true);
+                if (field.isAnnotationPresent(Id.class) && !field.isAnnotationPresent(GeneratedValue.class)&& field.get(object) == null) {
+                    System.out.println("Объект " + object.toString() + " имеет null в поле Id");
+                }
+            }
+            catch (IllegalAccessException e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 }
