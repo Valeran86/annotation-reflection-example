@@ -24,50 +24,28 @@ public class ServiceProxy implements java.lang.reflect.InvocationHandler {
              return method.invoke(obj, args) ;
          }
 
-         CacheDynamicProxy annotationCacheDynamicProxy=method.getAnnotation(CacheDynamicProxy.class);
+         try {
+             CacheDynamicProxy annotationCacheDynamicProxy = method.getAnnotation(CacheDynamicProxy.class);
 
-         switch (annotationCacheDynamicProxy.saveCacheType()){
-             case Constants.IN_MEMORY:
-                 return casheFromMemory(annotationCacheDynamicProxy,method,args);
-             case Constants.IN_FILE:
-                 return casheFromFile(annotationCacheDynamicProxy,method,args);
-             default:
-                 return method.invoke(obj, args) ;
+             ProxyObject proxyObject = getCacheProxyObject(annotationCacheDynamicProxy, method, args);
+
+             return returnValueFromCache(proxyObject, method, args, annotationCacheDynamicProxy.saveCacheType());
+         }catch (Exception ex){
+             ex.printStackTrace(System.out);
          }
+        return method.invoke(obj, args);
     }
 
-    private Object casheFromMemory(CacheDynamicProxy annotationCacheDynamicProxy, Method method, Object[] args)
-            throws Throwable{
-        ProxyObject proxyObject=getCasheProxyObject(annotationCacheDynamicProxy,method,args);
-        Object returnValue=proxyObject.getReturnValue();
-        if (returnValue!=null){
-            System.out.println("INFO: Значение взято из кэша");
-        }else {
-            System.out.println("INFO: Значение расчитано");
-            Object noCacheResult=method.invoke(obj, args);
-            returnValue=noCacheResult;
-            if(isCasheNewList){
-                noCacheResult=(((List)noCacheResult).subList(0, this.countList));
-                isCasheNewList=false;
-                this.countList=0;
-            }
-
-            ProxyObjectManager.addReturnValueInProxyObject(proxyObject,noCacheResult);
-
-        }
-        return returnValue;
-    }
-
-
-    private ProxyObject getCasheProxyObject(CacheDynamicProxy annotationCacheDynamicProxy, Method method, Object[] args){
-        HashMap<Class,Object> listParamValue=new HashMap<>();
+    private ProxyObject getCacheProxyObject(CacheDynamicProxy annotationCacheDynamicProxy, Method method, Object[] args){
+        HashMap<Class,Object> hashMapParamValue=new HashMap<>();
         HashMap<String,Object> hashMapAttrAnnotation=new HashMap<>();
+        String typeCache=annotationCacheDynamicProxy.saveCacheType();
 
         List identityBy=Arrays.asList(annotationCacheDynamicProxy.identityBy());
         if(args!=null){
             for(Object arg:args){
                 if(identityBy.size()==0 ||identityBy.contains(arg.getClass())){
-                    listParamValue.put(arg.getClass(),arg);
+                    hashMapParamValue.put(arg.getClass(),arg);
                 }
             }
         }
@@ -77,25 +55,53 @@ public class ServiceProxy implements java.lang.reflect.InvocationHandler {
             hashMapAttrAnnotation.put("countList",countList);
             this.countList=countList;
         }
+        if(typeCache.equals(Constants.IN_FILE)){
+            if(annotationCacheDynamicProxy.fileName().length()>0){
+                ProxyObjectManager.setFileName(annotationCacheDynamicProxy.fileName());
+            }else{
+                ProxyObjectManager.setFileName(method.getName());
+            }
 
-        return  ProxyObjectManager.proxyObjectContains(method,listParamValue,hashMapAttrAnnotation);
+        }
+
+        return  returnProxyObjectOnTypeCache(method,hashMapParamValue,hashMapAttrAnnotation,typeCache);
 
     }
 
-    private Object casheFromFile(CacheDynamicProxy annotationCacheDynamicProxy, Method method, Object[] args)
+    private ProxyObject returnProxyObjectOnTypeCache(Method method, HashMap<Class, Object> hashMapAttr,
+                 HashMap<String,Object> hashMapAttrAnnotation, String typeCache){
+        switch (typeCache){
+            case Constants.IN_MEMORY:
+                return  ProxyObjectManager.proxyObjectContainsMemory(method,hashMapAttr,hashMapAttrAnnotation);
+            case Constants.IN_FILE:
+                return ProxyObjectManager.proxyObjectContainsFile(method,hashMapAttr,hashMapAttrAnnotation);
+            default:
+                throw new IllegalArgumentException("ERROR: Отсутствует тип кэширования. Возможно в аннотации " +
+                        "CacheDynamicProxy установлен тип кэширования, обработка которого отсутствует.");
+        }
+
+    }
+
+    private Object returnValueFromCache(ProxyObject proxyObject, Method method, Object[] args, String typeCache)
             throws Throwable{
 
-//TODO предстоит сделать работу с файлами
-        if(/*Есть в файле*/1!=1){
-            System.out.println("INFO: Значение взято из файла");
-            return new Object()/*Из файла*/;
-        }else{
+        Object returnValue=proxyObject.getReturnValue();
+        if (returnValue!=null){
+            System.out.println("INFO: Значение взято из кэша");
+        } else {
             System.out.println("INFO: Значение расчитано");
             Object noCacheResult=method.invoke(obj, args);
+            returnValue=noCacheResult;
+            if(isCasheNewList){
+                noCacheResult=(((List)noCacheResult).subList(0, this.countList));
+                isCasheNewList=false;
+                this.countList=0;
+            }
 
+            ProxyObjectManager.addReturnValueInProxyObject(proxyObject,noCacheResult,typeCache);
 
-            return noCacheResult;
         }
+        return returnValue;
     }
 
 
