@@ -45,6 +45,13 @@ public class TestClass {
         LoNg = loNg;
     }
 
+    public void setLong( int loNg ) {
+        LoNg = loNg;
+    }
+
+
+
+
     public boolean isB() {
         return b;
     }

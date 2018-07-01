@@ -48,12 +48,10 @@ public class ReflectionExample {
         System.out.println("--- Declared methods of " + c.getName() + " ---------------------------------------");
 
         for (Method method : c.getDeclaredMethods()) {
-            System.out.println(new StringBuilder(Modifier.toString(method.getModifiers()))
-                    .append(" ")
-                    .append(method.getName())
-                    .append("(")
-                    .append(Arrays.toString(method.getParameters()).replaceAll("[\\[\\]]", ""))
-                    .append(")"));
+            System.out.format( "%s %s(%s)\n"
+                    , Modifier.toString(method.getModifiers())
+                    , method.getName()
+                    , Arrays.toString( method.getParameters() ).replaceAll( "[\\[\\]]","" ) );
         }
     }
 
@@ -71,8 +69,7 @@ public class ReflectionExample {
     public List<Method> getGetters(Class c) {
         List<Method> result = new ArrayList<>();
         List<Field> fields = Arrays.stream(c.getDeclaredFields())
-                .filter(field -> (field.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE
-                        && (field.getModifiers() & Modifier.STATIC) != Modifier.STATIC)
+                .filter(field -> fieldIsModifiers( field,  Modifier.PRIVATE, ~Modifier.STATIC))
                 .collect(Collectors.toList());
 
         for (Method method : c.getMethods()) {
@@ -93,9 +90,9 @@ public class ReflectionExample {
     public List<Method> getSetters(Class c) {
         List<Method> result = new ArrayList<>();
         List<Field> fields = Arrays.stream(c.getDeclaredFields())
-                .filter(field -> (field.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE
-                        && (field.getModifiers() & Modifier.STATIC) != Modifier.STATIC)
+                .filter(field -> fieldIsModifiers( field, Modifier.PRIVATE, ~Modifier.STATIC))
                 .collect(Collectors.toList());
+
         for (Method method : c.getMethods()) {
             if (method.getName().startsWith("set")
                     && method.getParameterCount() == 1
@@ -112,16 +109,25 @@ public class ReflectionExample {
 
     public boolean checkConstants(Class c) throws IllegalAccessException {
         boolean ret = true;
+        List<Field> fields = Arrays.stream(c.getDeclaredFields())
+                .filter(field -> fieldIsModifiers( field, Modifier.STATIC, Modifier.FINAL )
+                        && field.getType() == String.class )
+                .collect(Collectors.toList());
 
-        for (Field field : Arrays.stream(c.getDeclaredFields())
-                .filter(field -> (field.getModifiers() & Modifier.STATIC) == Modifier.STATIC
-                        && (field.getModifiers() & Modifier.FINAL) == Modifier.FINAL
-                        && field.getType() == String.class
-                ).collect(Collectors.toList())) {
+        for (Field field : fields) {
             ret &= field.getName().equals(field.get(this))
                     && field.getName().equals(field.getName().toUpperCase());
         }
 
+        return ret;
+    }
+
+    private static boolean fieldIsModifiers(Field field, int... modifiers){
+        boolean ret = true;
+        for ( int modifier : modifiers ) {
+            ret &= (modifier < 0 ? (field.getModifiers() | modifier)
+                                 : (field.getModifiers() & modifier)) == modifier;
+        }
         return ret;
     }
 }
