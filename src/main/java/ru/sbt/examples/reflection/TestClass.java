@@ -9,7 +9,7 @@ public class TestClass {
     private long LoNg;
     private boolean b;
 
-    public void setup( ) {
+    public void setup() {
 
     }
 
@@ -21,7 +21,7 @@ public class TestClass {
         this.i = i;
     }
 
-    public static String getS( ) {
+    public static String getS() {
         return s;
     }
 
@@ -29,7 +29,7 @@ public class TestClass {
         TestClass.s = s;
     }
 
-    public Date getDddddDdDdDdD( ) {
+    public Date getDddddDdDdDdD() {
         return dddddDdDdDdD;
     }
 
@@ -37,7 +37,7 @@ public class TestClass {
         this.dddddDdDdDdD = dddddDdDdDdD;
     }
 
-    public long getLoNg( ) {
+    public long getLoNg() {
         return LoNg;
     }
 
@@ -49,14 +49,28 @@ public class TestClass {
         LoNg = loNg;
     }
 
-
-
-
     public boolean isB() {
         return b;
     }
 
-    public void setB(boolean b) {
+    public void setB( boolean b ) {
         this.b = b;
+    }
+
+    public TestClass( int i, Date dddddDdDdDdD, long loNg, boolean b ) {
+        this.i = i;
+        this.dddddDdDdDdD = dddddDdDdDdD;
+        LoNg = loNg;
+        this.b = b;
+    }
+
+    @Override
+    public String toString() {
+        return "TestClass{" +
+                "i=" + i +
+                ", dddddDdDdDdD=" + dddddDdDdDdD +
+                ", LoNg=" + LoNg +
+                ", b=" + b +
+                '}';
     }
 }
