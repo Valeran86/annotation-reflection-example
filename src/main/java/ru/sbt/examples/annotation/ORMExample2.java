@@ -16,8 +16,10 @@ import javax.persistence.Id;
 public class ORMExample2 {
     @Id
     private Integer id;
+
     @Column( nullable = false )
     private String service;
+
     @Column( precision = 2 )
     private Double price;
 }
