@@ -69,7 +69,7 @@ public class ReflectionExample {
         }
         System.out.println(names.length);
     }
-    static boolean isGetter(Method method){
+    public static boolean isGetter(Method method){
         if(!method.getName().startsWith("get"))      return false;
         if(method.getParameterTypes().length != 0)   return false;
         if(void.class.equals(method.getReturnType())) return false;
