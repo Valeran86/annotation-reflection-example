@@ -7,9 +7,9 @@ import ru.sbt.examples.dinamic.cash.proxy.constants.Constants;
 import java.util.List;
 
 public interface IService {
-    @CacheDynamicProxy(saveCacheType =Constants.IN_FILE, fileName = "hard")
-    public Double doHardWork(String param1,Integer param2);
+    @CacheDynamicProxy(saveCacheType =Constants.IN_FILE, fileName = "hard2")
+    Double doHardWork(String param1,Integer param2);
     @CacheDynamicProxy(countList=100)
-    public List<String> doListMoreLines();
+    List<String> doListMoreLines();
 
 }

@@ -1,69 +1,25 @@
 package ru.sbt.examples.dinamic.cash.proxy;
 
+import ru.sbt.examples.dinamic.cash.proxy.annotation.CacheDynamicProxy;
 import ru.sbt.examples.dinamic.cash.proxy.constants.Constants;
+import ru.sbt.examples.dinamic.cash.proxy.manager.FileProxyObjectManager;
+import ru.sbt.examples.dinamic.cash.proxy.manager.IProxyObjectManager;
+import ru.sbt.examples.dinamic.cash.proxy.manager.MemoryProxyObjectManager;
 
-import java.io.*;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class ProxyObjectManager {
-    private static List<ProxyObject> listProxyObject=new ArrayList<>();
-    private static String fileNameTxt;
+    private static IProxyObjectManager proxyObjectManager;
 
-
-    public static ProxyObject newProxyObjectList(Method metod, HashMap<Class, Object> hashMapAttr, HashMap<String,Object> hashMapAttrAnnotation, Object returnValue){
-        ProxyObject proxyObject= new ProxyObject(metod,hashMapAttr,hashMapAttrAnnotation,returnValue);
-        listProxyObject.add(proxyObject);
-        return proxyObject;
-    }
-
-    public static List<ProxyObject> allProxyObject(){
-        List<ProxyObject> newListProxyObject=new ArrayList<>();
-        newListProxyObject.addAll(listProxyObject);
-        return  newListProxyObject;
-    }
-
-     public static void setFileName(String fileName){
-        fileNameTxt=fileName+".txt";
-    }
-    public static ProxyObject proxyObjectContainsMemory(Method method, HashMap<Class, Object> hashMapAttr,
-                                                  HashMap<String,Object> hashMapAttrAnnotation){
-        ProxyObject newProxyObject= new ProxyObject(method,hashMapAttr,hashMapAttrAnnotation,null);
-        for(ProxyObject proxyObject:listProxyObject){
-            if(newProxyObject.equals(proxyObject)){
-                return proxyObject;
-            }
-        }
-        return  newProxyObject;
-    }
-
-    public static ProxyObject proxyObjectContainsFile(Method method, HashMap<Class, Object> hashMapAttr,
-                                          HashMap<String,Object> hashMapAttrAnnotation){
-        List<ProxyObject> proxyObjectsList=returnProxyObjectsFile();
-        ProxyObject newProxyObject= new ProxyObject(method,hashMapAttr,hashMapAttrAnnotation,null);
-        for(ProxyObject proxyObject:proxyObjectsList){
-            if(newProxyObject.equals(proxyObject)){
-                return proxyObject;
-            }
-        }
-        return  newProxyObject;
-    }
-
-
-
-
-    public static void addReturnValueInProxyObject(ProxyObject proxyObject,Object returnValue, String typeCache){
-        proxyObject.setReturnValue(returnValue);
+    public static void createProxyObjectManager(String typeCache){
         switch (typeCache){
             case Constants.IN_MEMORY:
-                listProxyObject.add(proxyObject);
+                proxyObjectManager=new MemoryProxyObjectManager();
                 break;
             case Constants.IN_FILE:
-                List<ProxyObject> proxyObjectsList=returnProxyObjectsFile();
-                proxyObjectsList.add(proxyObject);
-                writeProxyObjectsFile(proxyObjectsList);
+                proxyObjectManager=new FileProxyObjectManager();
                 break;
             default:
                 throw new IllegalArgumentException("ERROR: Отсутствует тип кэширования. Возможно в аннотации " +
@@ -71,47 +27,36 @@ public class ProxyObjectManager {
         }
     }
 
-    private static void writeProxyObjectsFile(List<ProxyObject> proxyObjectsList){
-        try {
-            FileOutputStream fos = new FileOutputStream(fileNameTxt);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            for (ProxyObject proxyObject:proxyObjectsList){
-                oos.writeObject(proxyObject);
+    public static HashMap<String,Object> createHashMapAttrAnnotation(CacheDynamicProxy annotationCacheDynamicProxy, Method method){
+        HashMap<String,Object> hashMapAttrAnnotation=new HashMap<>();
+        String typeCache=annotationCacheDynamicProxy.saveCacheType();
+        int countList=annotationCacheDynamicProxy.countList();
+        if(countList>=0 && method.getReturnType().equals(List.class)){
+            hashMapAttrAnnotation.put(Constants.IS_CACHE_NEW_LIST,true);
+            hashMapAttrAnnotation.put(Constants.COUNT_LIST,countList);
+        }
+        if((Constants.IN_FILE).equals(typeCache)){
+            if(annotationCacheDynamicProxy.fileName().length()>0){
+                hashMapAttrAnnotation.put(Constants.FILE_NAME,annotationCacheDynamicProxy.fileName());
+            }else{
+                hashMapAttrAnnotation.put(Constants.FILE_NAME,method.getName());
             }
-            oos.flush();
-            oos.close();
-        }catch (java.io.NotSerializableException nse){
-            System.out.println("Error:Объект запиываемый в файл не Серрриализован. Произведите сериализацию объекта " +
-                    "путем добавления implements Serializable: "+ nse.getMessage());
+
         }
-        catch (IOException ex){
-            ex.printStackTrace(System.out);
-        }
+
+        proxyObjectManager.initialConfiguration(hashMapAttrAnnotation);
+
+        return hashMapAttrAnnotation;
     }
 
-    private static List<ProxyObject> returnProxyObjectsFile(){
-        List<ProxyObject> proxyObjectsList=new ArrayList<>();
-        if(!(new File(fileNameTxt)).exists()){
-            return proxyObjectsList;
-        }
-        try{ FileInputStream fis = new FileInputStream(fileNameTxt);
-            ObjectInputStream inputStream = new ObjectInputStream(fis);
-            while (fis.available() > 0) {
-                ProxyObject proxyObject=(ProxyObject) inputStream .readObject();
-                proxyObjectsList.add(proxyObject);
-            }
-            inputStream.close();
-        }
-        catch(IOException e){
-            System.out.println("Error:Объект запиываемый в файл не Серрриализован. Произведите сериализацию объекта " +
-                    "путем добавления implements Serializable: "+ e.getMessage());
-        }
-        catch(Exception e){
-            System.out.println("Error: Ошибка при чтении файла. Убедитесь что файл присуствует и доступен для чтения. "
-                    +e.getMessage());
-        }
-        return proxyObjectsList;
+
+    public static ProxyObject proxyObjectContains(Method method, HashMap<Class, Object> hashMapAttr,
+                  HashMap<String,Object> hashMapAttrAnnotation){
+        return  proxyObjectManager.proxyObjectContains(method,hashMapAttr,hashMapAttrAnnotation);
     }
 
+    public static void addReturnValueInProxyObject(ProxyObject proxyObject,Object returnValue){
+        proxyObjectManager.addReturnValueInProxyObject(proxyObject,returnValue);
+    }
 
 }
