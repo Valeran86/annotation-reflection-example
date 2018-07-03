@@ -20,8 +20,8 @@ public class BeanUtils {
         to.setMap( new HashMap<>() );
         assign( from, to );
 
-        TestClass testClass1=new TestClass( 1, new Date(  ), 1l,true);
-        TestClass testClass2=new TestClass( 2, new Date(  ), 2l,false);
+        TestClass testClass1=new TestClass( 1, new Date(  ), 1L,true);
+        TestClass testClass2=new TestClass( 2, new Date(  ), 2L,false);
         System.out.println(testClass1+" "+testClass2);
         assign( testClass1, testClass2 );
         System.out.println(testClass1+" "+testClass2);
