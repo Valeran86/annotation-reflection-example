@@ -1,7 +1,12 @@
 package ru.sbt.examples.annotation;
 
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * II. Аннотации
@@ -18,41 +23,7 @@ import java.util.List;
 public class AnnotationExample {
 
     public static void main( String... args ) {
-        List<Object> ormExampleList = Arrays.asList(
-                ORMExample.builder()
-                        .name( "вот такое имя хочу сохранить в БД" )
-                        .active( null )
-                        .build()
-                , ORMExample.builder()
-                        .name( "shorter name" )
-                        .active( Boolean.TRUE )
-                        .build()
-                , ORMExample2.builder()
-                        .id( 1 )
-                        .service( "очень-очень длинная строка очень-очень длинная строка очень-очень длинная строка очень-очень длинная строка очень-очень длинная строка очень-очень длинная строка очень-очень длинная строка " )
-                        .price( 123.45 )
-                        .build()
-                , ORMExample2.builder()
-                        .id( 1 )
-                        .service( "разработка на java" )
-                        .price( 123456789.123456789 )
-                        .build()
-        );
-        System.out.println( "ormExampleList\n" + ormExampleList );
-
-        for ( Object ormExample : ormExampleList ) {
-            // 1
-            checkPrimaryKey( ormExample );
-            // 2
-            checkColumnLimitation( ormExample );
-        }
+//Задача закрыта. Убрал чтобы не отвлекало.
     }
 
-    private static void checkColumnLimitation( Object object ) {
-        // добавить проверки
-    }
-
-    private static void checkPrimaryKey( Object object ) {
-        // добавить проверки
-    }
 }

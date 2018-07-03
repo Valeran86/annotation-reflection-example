@@ -2,6 +2,10 @@ package ru.sbt.examples.reflection;
 
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
 /**
  * I. Рефлексия
  * 1.Вывести на консоль все методы класса Double, включая все родительские методы  (включая приватные)
@@ -18,9 +22,7 @@ public class ReflectionExample {
     public static final String FAIL_CONSTANT = "bad_constant_name";
 
     public static void main( String... args ) {
-        Number n = Double.valueOf( 1d );
-
-        System.out.println( n );
-        System.out.println( ReflectionToStringBuilder.toString( n ) );
+        //Задача закрыта. Убрал чтобы не отвлекало.
     }
+
 }
