@@ -12,6 +12,13 @@
         <hibernate-version>5.2.17.Final</hibernate-version>
         <lombok.version>1.16.18</lombok.version>
         <commons-lang.version>2.6</commons-lang.version>
+        <!-- без этих двух строчек maven не собирает сборку: Use 1.6 or later.
+         также для работы switch со строкой
+        -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <!-- В консоли белеберда типа такой: Р?Р?С? С?Р°РєР?Р? РёР?С? С?Р?С?С? С?Р?С?С?Р°Р?РёС?С? Р? Р?Р? -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
