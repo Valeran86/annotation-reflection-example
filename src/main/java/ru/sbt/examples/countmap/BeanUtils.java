@@ -8,11 +8,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 public class BeanUtils {
     public static void main( String[] args ) {
-        CountMapImpl< String > from = new CountMapImpl<>();
-        CountMapImpl< String > to = new CountMapImpl<>();
+        CountMapImpl<String> from = new CountMapImpl<>();
+        CountMapImpl<String> to = new CountMapImpl<>();
         from.setField1( "field1_from" );
         from.setMap( new HashMap<>() );
 
@@ -20,18 +21,19 @@ public class BeanUtils {
         to.setMap( new HashMap<>() );
         assign( from, to );
 
-        TestClass testClass1=new TestClass( 1, new Date(  ), 1L,true);
-        TestClass testClass2=new TestClass( 2, new Date(  ), 2L,false);
-        System.out.println(testClass1+" "+testClass2);
+        TestClass testClass1 = new TestClass( 1, new Date(), 1L, true );
+        TestClass testClass2 = new TestClass( 2, new Date(), 2L, false );
+        System.out.println( testClass1 + " " + testClass2 );
         assign( testClass1, testClass2 );
-        System.out.println(testClass1+" "+testClass2);
+        System.out.println( testClass1 + " " + testClass2 );
     }
 
     public static void assign( Object from, Object to ) {
         ReflectionExample re = new ReflectionExample();
+        List<Method> setters = re.getSetters( to.getClass() );
 
         for ( Method getter : re.getGetters( from.getClass() ) ) {
-            for ( Method setter : re.getSetters( to.getClass() ) ) {
+            for ( Method setter : setters ) {
                 if ( !methodsIsCorrespondents( getter, setter ) ) continue;
                 try {
                     setter.invoke( to, getter.invoke( from ) );
