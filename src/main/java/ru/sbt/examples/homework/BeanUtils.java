@@ -1,6 +1,6 @@
 package ru.sbt.examples.homework;
 
-import com.sun.istack.internal.NotNull;
+//import com.sun.istack.internal.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,9 +23,11 @@ public class BeanUtils {
      * @param from Object which properties will be used to get values.
      */
 
-    public static void assign( @NotNull java.lang.Object to,  @NotNull java.lang.Object from) throws InvocationTargetException, IllegalAccessException {
+    public static void assign(   java.lang.Object to,  java.lang.Object from)  {
         //no Check for NPE with use  @NotNull
-        for ( Method getter : to.getClass().getDeclaredMethods() ) {
+        if (to ==null || from ==null)
+            return;
+        for ( Method getter : from.getClass().getDeclaredMethods() ) {
             // проверим что это clean getter: чистый геттер без параметров
             if (!(getter.getName().startsWith( "get" ) && getter.getParameterCount() ==0 ))
                 continue;
@@ -33,7 +35,7 @@ public class BeanUtils {
             //  1 проверяем что setter существует для типа clazzValueChanger существует, получаем его имя from
             //  2 получаем значение геттера
             //  3 присваиваем его
-            Method setter = getSetterName (clazzGetterValue , from);
+            Method setter = getSetterName (clazzGetterValue , to, "set" +  getter.getName().substring( "get".length() ));
             if (setter == null )
                 continue;
             java.lang.Object value = getValue (from,getter) ;
@@ -42,14 +44,17 @@ public class BeanUtils {
     }
 
     /**
-     *
-     * @param clazzGetterValue
-     * @param objectTo
-     * @return
+     * Получаем имя сеттера
+     * @param clazzGetterValue   Тип класса , который должен соотвествовать Super Class  сеттера
+     * @param objectTo           Экземпляр класса, где будем искать сеттер
+     * @param settername         Соотвествующее имя сеттера
+     * @return Метод ( сеттер), null если соотвествущий сеттер не найден
      */
-    private static Method getSetterName (final Class clazzGetterValue ,  java.lang.Object objectTo ){
+    private static Method getSetterName (final Class clazzGetterValue ,  java.lang.Object objectTo,     String settername  ){
         for ( Method setter :  objectTo.getClass().getDeclaredMethods()       ) {
             if (!( setter.getName().startsWith( "set" ) && setter.getParameterCount() ==1))
+                continue;
+            if (!(settername.equals( setter.getName() )))
                 continue;
             Class <?> setterClass = setter.getParameterTypes()[0];
             Class <?> getterSuperClass = clazzGetterValue;
@@ -65,10 +70,10 @@ public class BeanUtils {
 
 
     /**
-     *
-     * @param objectTo
-     * @param setter
-     * @param value
+     * Присваиваем значение
+     * @param objectTo  Объект в котором будет вызван соотвествующий сеттер
+     * @param setter    Метод, который вызовем у объекта objectTo, что бы присвоить значение
+     * @param value     Значение, которое необходимо будет присвоть
      */
     private static void setValue ( java.lang.Object objectTo ,Method setter,  java.lang.Object  value ){
         try {
@@ -87,14 +92,17 @@ public class BeanUtils {
 
 
     /**
-     * @param objectfrom
-     * @param method
-     * @return
+     * Получаем значение
+     * @param objectfrom Откуда получаем
+     * @param method     Геттер
+     * @return           Значение
      */
     private static java.lang.Object getValue ( java.lang.Object objectfrom  , Method method  )   {
         java.lang.Object result = null;
         try{
-            result = method.invoke( objectfrom );
+            System.out.println(method.getName());
+            System.out.println(method.getParameterTypes().length);
+            result = method.invoke( objectfrom  );
         }
         catch ( InvocationTargetException ex ){
             // по условию задачи не понятно:  если мы не смогли получить значение при падении геттера,
