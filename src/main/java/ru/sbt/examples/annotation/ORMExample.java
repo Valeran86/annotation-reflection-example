@@ -15,8 +15,10 @@ public class ORMExample {
     @Id
     @GeneratedValue
     private Integer id;
+    @Id
     @Column( length = 30, name = "NAME_IN_TABLE" )
     private String name;
+
     @Column( nullable = false )
     private Boolean active;
 }
