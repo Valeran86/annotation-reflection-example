@@ -62,9 +62,9 @@ public class AnnotationExample {
 
                 try {
                     value = field.get( obj );
-                    if (value!=null&&value.toString( ).equals( col.name( ) )&&value.toString().length()==col.length() )
-                    //(col.nullable()==(value==null)))
-                    //&&value.toString().length()==col.length()
+
+                    if (checkNullable(value, col)&&checkPrecision(value, col)&&(checkLength( value, col ))&&checkName( value, col ))
+
                     {
                         System.out.println( "Значение " + value + " соответсвует заданным ограничениям" );
 
@@ -80,6 +80,41 @@ public class AnnotationExample {
             }
         }
         // добавить проверки
+    }
+
+    public static boolean checkNullable(Object value, Column annotation) {
+        if (value instanceof Boolean) {
+            return ( annotation.nullable( ) && value == null ) || ( !annotation.nullable( ) && value != null );
+        }
+        return true;
+
+    }
+    public static boolean checkPrecision(Object value, Column annotation) {
+        if (value instanceof Double) {
+            String strValue = value.toString( );
+            int indexDot = strValue.indexOf( "." );
+            if ( indexDot > -1 ) {
+                String fraction = strValue.substring( indexDot );
+                return ( fraction.length( ) >= annotation.precision( ) );
+            } else
+                return ( annotation.precision( ) == 0 );
+        }
+        return true;
+
+    }
+    public static boolean checkLength(Object value, Column annotation) {
+        if (value instanceof String) {
+            return value.toString( ).length( ) <= annotation.length( );
+        }
+        return true;
+
+    }
+
+    public static boolean checkName(Object value, Column annotation) {
+        if (value instanceof String) {
+            return value.toString( ).equals( annotation.name( ) );
+        }
+        return true;
     }
 
     private static void checkPrimaryKey( Object object ) {

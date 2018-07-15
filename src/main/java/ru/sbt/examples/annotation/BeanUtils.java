@@ -36,22 +36,19 @@ public class BeanUtils {
         Class < ? > classFrom = from.getClass( );
         Method[] methodsFrom = classFrom.getDeclaredMethods( );
         ArrayList<Method> methodsFromList = new ArrayList< Method >(  );
-        methodsFromList.addAll( Arrays.asList( methodsFrom ) );
-
         Class < ? > classTo = to.getClass( );
         Method[] methodsTo = classTo.getDeclaredMethods( );
         ArrayList<Method> methodsToList = new ArrayList< Method >(  );
-        methodsToList.addAll( Arrays.asList( methodsTo ) );
 
-        for (Method method : methodsFromList) {
-            if (!Modifier.isPublic( method.getModifiers( )) || (!(method.getName( ).matches( "^get[A-Z].*" )) )) {
-                methodsFromList.remove( method );
+        for (Method method : methodsFrom) {
+            if (Modifier.isPublic( method.getModifiers( )) && (method.getName( ).matches( "^get[A-Z].*" )) ) {
+                methodsFromList.add( method );
             }
         }
 
-        for ( Method method : methodsToList ) {
-            if (!(Modifier.isPublic( method.getModifiers( ))&&method.getName( ).matches( "^set[A-Z].*" ))) {
-                methodsToList.remove( method );
+        for ( Method method : methodsTo ) {
+            if (Modifier.isPublic( method.getModifiers( ))&&method.getName( ).matches( "^set[A-Z].*" )) {
+                methodsToList.add( method );
             }
         }
 
@@ -65,7 +62,7 @@ public class BeanUtils {
                         Class <?> parGet = methodFrom.getReturnType();
                         Class <?> parSet = methodTo.getParameterTypes()[0];
                         if ( parGet.isAssignableFrom( parSet )) {
-                            System.out.println( "Подходят " + parGet + parSet );
+                            System.out.println( "Типы параметров подходят: " + parGet + " - "+ parSet );
                             try {
                                 Object ret =  methodFrom.invoke( from);
                                 methodTo.invoke( to, ret );
